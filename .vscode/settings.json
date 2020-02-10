@@ -1,0 +1,29 @@
+{
+  "editor.formatOnSave": true,
+
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
+  "[javascriptreact]": {
+    "editor.formatOnSave": false
+  },
+  "[typescript]": {
+    "editor.formatOnSave": false
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": false
+  },
+
+  "eslint.packageManager": "yarn",
+
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/package-lock.json": true
+  },
+
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
+}

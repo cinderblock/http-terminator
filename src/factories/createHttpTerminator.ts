@@ -1,12 +1,12 @@
-// @flow
-
-import type {
+import {
   HttpTerminatorType,
   HttpTerminatorConfigurationInputType,
 } from '../types';
 import createInternalHttpTerminator from './createInternalHttpTerminator';
 
-export default (configurationInput: HttpTerminatorConfigurationInputType): HttpTerminatorType => {
+export default (
+  configurationInput: HttpTerminatorConfigurationInputType,
+): HttpTerminatorType => {
   const httpTerminator = createInternalHttpTerminator(configurationInput);
 
   return {

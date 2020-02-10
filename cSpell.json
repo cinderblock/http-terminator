@@ -1,0 +1,17 @@
+{
+  "version": "0.1",
+  "language": "en",
+  "ignorePaths": ["package-lock.json", "dist/"],
+  "words": [
+    "agentkeepalive",
+    "cinderblock",
+    "downlevel",
+    "Gajus",
+    "Interop",
+    "Kuizinas",
+    "promisify",
+    "roarr",
+    "stateful",
+    "Tacklind"
+  ]
+}

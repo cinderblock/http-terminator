@@ -1,8 +1,7 @@
-// @flow
-
 import http from 'http';
+import { Socket as NodeSocket } from 'net';
 import delay from 'delay';
-import type {
+import {
   HttpTerminatorConfigurationInputType,
   InternalHttpTerminatorType,
 } from '../types';
@@ -16,7 +15,13 @@ const configurationDefaults = {
   gracefulTerminationTimeout: 1000,
 };
 
-export default (configurationInput: HttpTerminatorConfigurationInputType): InternalHttpTerminatorType => {
+// TODO: Improve this type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Socket = NodeSocket & { server: http.Server; _httpMessage: any };
+
+export default (
+  configurationInput: HttpTerminatorConfigurationInputType,
+): InternalHttpTerminatorType => {
   const configuration = {
     ...configurationDefaults,
     ...configurationInput,
@@ -24,12 +29,12 @@ export default (configurationInput: HttpTerminatorConfigurationInputType): Inter
 
   const server = configuration.server;
 
-  const sockets = new Set();
-  const secureSockets = new Set();
+  const sockets = new Set<Socket>();
+  const secureSockets = new Set<Socket>();
 
-  let terminating;
+  let terminating: Promise<void>;
 
-  server.on('connection', (socket) => {
+  server.on('connection', (socket: Socket) => {
     if (terminating) {
       socket.destroy();
     } else {
@@ -41,7 +46,7 @@ export default (configurationInput: HttpTerminatorConfigurationInputType): Inter
     }
   });
 
-  server.on('secureConnection', (socket) => {
+  server.on('secureConnection', (socket: Socket) => {
     if (terminating) {
       socket.destroy();
     } else {
@@ -58,21 +63,21 @@ export default (configurationInput: HttpTerminatorConfigurationInputType): Inter
    *
    * @see https://github.com/nodejs/node/blob/57bd715d527aba8dae56b975056961b0e429e91e/lib/_http_client.js#L363-L413
    */
-  const destroySocket = (socket) => {
+  const destroySocket = (socket: Socket): void => {
     socket.destroy();
 
     sockets.delete(socket);
   };
 
-  const terminate = async () => {
+  const terminate = async (): Promise<void> => {
     if (terminating) {
       log.warn('already terminating HTTP server');
 
       return terminating;
     }
 
-    let resolveTerminating;
-    let rejectTerminating;
+    let resolveTerminating: () => void;
+    let rejectTerminating: (e: Error) => void;
 
     terminating = new Promise((resolve, reject) => {
       resolveTerminating = resolve;
@@ -128,7 +133,7 @@ export default (configurationInput: HttpTerminatorConfigurationInputType): Inter
       }
     }
 
-    server.close((error) => {
+    server.close(error => {
       if (error) {
         rejectTerminating(error);
       } else {

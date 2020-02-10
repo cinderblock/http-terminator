@@ -1,92 +1,67 @@
 {
+  "description": "Gracefully terminates HTTP(S) server, with TypeScript support",
+  "license": "BSD-3-Clause",
+  "main": "./dist/index.js",
+  "name": "@cinderblock/http-terminator",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cinderblock/http-terminator"
+  },
+  "engines": {
+    "node": ">=7.10.1"
+  },
   "author": {
     "email": "gajus@gajus.com",
     "name": "Gajus Kuizinas",
     "url": "http://gajus.com"
   },
-  "ava": {
-    "babel": {
-      "compileAsTests": [
-        "test/helpers/**/*"
-      ]
-    },
-    "files": [
-      "test/http-terminator/**/*"
-    ],
-    "require": [
-      "@babel/register"
-    ]
-  },
+  "contributors": [
+    {
+      "email": "cameron@tacklind.com",
+      "name": "Cameron Tacklind"
+    }
+  ],
+  "keywords": [
+    "express",
+    "koa",
+    "http",
+    "https",
+    "socket",
+    "destroy"
+  ],
   "dependencies": {
     "delay": "^4.3.0",
-    "roarr": "^2.14.6"
+    "roarr": "^2.15.2"
   },
-  "description": "Gracefully terminates HTTP(S) server.",
   "devDependencies": {
-    "@ava/babel": "^1.0.0",
-    "@babel/cli": "^7.8.3",
-    "@babel/core": "^7.8.3",
-    "@babel/node": "^7.8.3",
-    "@babel/plugin-transform-flow-strip-types": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
-    "@babel/register": "^7.8.3",
+    "@ava/typescript": "^1.1.0",
+    "@types/pem": "^1.9.5",
+    "@types/roarr": "^2.14.2",
+    "@types/sinon": "^7.5.1",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
     "agentkeepalive": "^4.1.0",
-    "ava": "^3.0.0",
-    "babel-plugin-istanbul": "^6.0.0",
-    "babel-plugin-transform-export-default-name": "^2.0.4",
-    "coveralls": "^3.0.9",
+    "ava": "^3.2.0",
+    "cspell": "^4.0.46",
     "eslint": "^6.8.0",
-    "eslint-config-canonical": "^18.1.0",
-    "flow-bin": "^0.116.1",
-    "flow-copy-source": "^2.0.9",
-    "gitdown": "^3.1.2",
-    "got": "^10.2.2",
-    "husky": "^4.0.10",
+    "eslint-config-prettier": "^6.10.0",
+    "got": "^10.5.5",
+    "husky": "^4.2.1",
     "nyc": "^15.0.0",
-    "pem": "^1.14.3",
-    "semantic-release": "^16.0.2",
-    "sinon": "^8.1.0"
-  },
-  "engines": {
-    "node": ">=10"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint && npm run test && npm run build"
-    }
-  },
-  "keywords": [
-    "kubernetes",
-    "prometheus"
-  ],
-  "license": "BSD-3-Clause",
-  "main": "./dist/index.js",
-  "name": "http-terminator",
-  "nyc": {
-    "all": true,
-    "include": [
-      "src/**/*.js"
-    ],
-    "instrument": false,
-    "reporter": [
-      "html",
-      "text-summary"
-    ],
-    "require": [
-      "@babel/register"
-    ],
-    "silent": true,
-    "sourceMap": false
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gajus/http-terminator"
+    "pem": "^1.14.4",
+    "prettier": "^1.19.1",
+    "semantic-release": "^17.0.2",
+    "sinon": "^8.1.1",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5"
   },
   "scripts": {
-    "build": "rm -fr ./dist && NODE_ENV=production babel ./src --out-dir ./dist --copy-files --source-maps && flow-copy-source src dist",
-    "generate-readme": "gitdown ./.README/README.md --output-file ./README.md",
-    "lint": "eslint ./src ./test && flow",
-    "test": "NODE_ENV=test ava --verbose --serial"
-  },
-  "version": "1.0.0"
+    "clean": "rm -fr ./dist",
+    "build": "tsc",
+    "prepare": "npm run build",
+    "lint": "eslint \"**\"",
+    "spell": "cspell \"**\"",
+    "test": "ava --verbose --serial || true"
+  }
 }

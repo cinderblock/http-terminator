@@ -1,27 +1,23 @@
-// @flow
-
-/* eslint-disable ava/no-ignored-test-files */
-
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import test from 'ava';
 import sinon from 'sinon';
 import delay from 'delay';
 import got from 'got';
-import KeepAliveHttpAgent from 'agentkeepalive';
+import KeepAliveHttpAgent, {
+  HttpsAgent as KeepAliveHttpsAgent,
+} from 'agentkeepalive';
 import createHttpTerminator from '../../src/factories/createHttpTerminator';
-import type {
-  HttpServerFactoryType,
-} from './createHttpServer';
-import type {
-  HttpsServerFactoryType,
-} from './createHttpsServer';
+import { HttpServerFactoryType } from './createHttpServer';
+import { HttpsServerFactoryType } from './createHttpsServer';
 
-const KeepAliveHttpsAgent = KeepAliveHttpAgent.HttpsAgent;
+export default (
+  createHttpServer: HttpServerFactoryType | HttpsServerFactoryType,
+): void => {
+  test('terminates HTTP server with no connections', async t => {
+    const httpServer = await createHttpServer(() => {
+      // Do nothing
+    });
 
-export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType) => {
-  test('terminates HTTP server with no connections', async (t) => {
-    const httpServer = await createHttpServer(() => {});
-
-    // eslint-disable-next-line ava/use-t-well
     t.timeout(100);
 
     t.true(httpServer.server.listening);
@@ -35,14 +31,13 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
     t.false(httpServer.server.listening);
   });
 
-  test('terminates hanging sockets after gracefulTerminationTimeout', async (t) => {
+  test('terminates hanging sockets after gracefulTerminationTimeout', async t => {
     const spy = sinon.spy();
 
     const httpServer = await createHttpServer(() => {
       spy();
     });
 
-    // eslint-disable-next-line ava/use-t-well
     t.timeout(500);
 
     const terminator = createHttpTerminator({
@@ -50,7 +45,7 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
       server: httpServer.server,
     });
 
-    got(httpServer.url);
+    got(httpServer.url!);
 
     await delay(50);
 
@@ -68,26 +63,21 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
     t.is(await httpServer.getConnections(), 0);
   });
 
-  test('server stops accepting new connections after terminator.terminate() is called', async (t) => {
+  test('server stops accepting new connections after terminator.terminate() is called', async t => {
     const stub = sinon.stub();
 
-    stub
-      .onCall(0)
-      .callsFake((incomingMessage, outgoingMessage) => {
-        setTimeout(() => {
-          outgoingMessage.end('foo');
-        }, 100);
-      });
+    stub.onCall(0).callsFake((incomingMessage, outgoingMessage) => {
+      setTimeout(() => {
+        outgoingMessage.end('foo');
+      }, 100);
+    });
 
-    stub
-      .onCall(1)
-      .callsFake((incomingMessage, outgoingMessage) => {
-        outgoingMessage.end('bar');
-      });
+    stub.onCall(1).callsFake((incomingMessage, outgoingMessage) => {
+      outgoingMessage.end('bar');
+    });
 
     const httpServer = await createHttpServer(stub);
 
-    // eslint-disable-next-line ava/use-t-well
     t.timeout(500);
 
     const terminator = createHttpTerminator({
@@ -95,7 +85,7 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
       server: httpServer.server,
     });
 
-    const request0 = got(httpServer.url);
+    const request0 = got(httpServer.url!);
 
     await delay(50);
 
@@ -103,7 +93,7 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
 
     await delay(50);
 
-    const request1 = got(httpServer.url, {
+    const request1 = got(httpServer.url!, {
       retry: 0,
       timeout: {
         connect: 50,
@@ -119,14 +109,15 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
     t.is(response0.body, 'foo');
   });
 
-  test('ongoing requests receive {connection: close} header', async (t) => {
-    const httpServer = await createHttpServer((incomingMessage, outgoingMessage) => {
-      setTimeout(() => {
-        outgoingMessage.end('foo');
-      }, 100);
-    });
+  test('ongoing requests receive {connection: close} header', async t => {
+    const httpServer = await createHttpServer(
+      (incomingMessage, outgoingMessage) => {
+        setTimeout(() => {
+          outgoingMessage.end('foo');
+        }, 100);
+      },
+    );
 
-    // eslint-disable-next-line ava/use-t-well
     t.timeout(600);
 
     const terminator = createHttpTerminator({
@@ -142,7 +133,7 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
       maxSockets: 1,
     });
 
-    const request = got(httpServer.url, {
+    const request = got(httpServer.url!, {
       agent: {
         http: httpAgent,
         https: httpsAgent,
@@ -159,34 +150,29 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
     t.is(response.body, 'foo');
   });
 
-  test('ongoing requests receive {connection: close} header (new request reusing an existing socket)', async (t) => {
+  test('ongoing requests receive {connection: close} header (new request reusing an existing socket)', async t => {
     const stub = sinon.stub();
 
-    stub
-      .onCall(0)
-      .callsFake((incomingMessage, outgoingMessage) => {
-        outgoingMessage.write('foo');
+    stub.onCall(0).callsFake((incomingMessage, outgoingMessage) => {
+      outgoingMessage.write('foo');
 
-        setTimeout(() => {
-          outgoingMessage.end('bar');
-        }, 50);
-      });
+      setTimeout(() => {
+        outgoingMessage.end('bar');
+      }, 50);
+    });
 
-    stub
-      .onCall(1)
-      .callsFake((incomingMessage, outgoingMessage) => {
-        // @todo Unable to intercept the response without the delay.
-        // When `end()` is called immediately, the `request` event
-        // already has `headersSent=true`. It is unclear how to intercept
-        // the response beforehand.
-        setTimeout(() => {
-          outgoingMessage.end('baz');
-        }, 50);
-      });
+    stub.onCall(1).callsFake((incomingMessage, outgoingMessage) => {
+      // @todo Unable to intercept the response without the delay.
+      // When `end()` is called immediately, the `request` event
+      // already has `headersSent=true`. It is unclear how to intercept
+      // the response beforehand.
+      setTimeout(() => {
+        outgoingMessage.end('baz');
+      }, 50);
+    });
 
     const httpServer = await createHttpServer(stub);
 
-    // eslint-disable-next-line ava/use-t-well
     t.timeout(1000);
 
     const terminator = createHttpTerminator({
@@ -202,7 +188,7 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
       maxSockets: 1,
     });
 
-    const request0 = got(httpServer.url, {
+    const request0 = got(httpServer.url!, {
       agent: {
         http: httpAgent,
         https: httpsAgent,
@@ -213,7 +199,7 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
 
     terminator.terminate();
 
-    const request1 = got(httpServer.url, {
+    const request1 = got(httpServer.url!, {
       agent: {
         http: httpAgent,
         https: httpsAgent,
@@ -236,14 +222,15 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
     t.is(response1.body, 'baz');
   });
 
-  test('does not send {connection: close} when server is not terminating', async (t) => {
-    const httpServer = await createHttpServer((incomingMessage, outgoingMessage) => {
-      setTimeout(() => {
-        outgoingMessage.end('foo');
-      }, 50);
-    });
+  test('does not send {connection: close} when server is not terminating', async t => {
+    const httpServer = await createHttpServer(
+      (incomingMessage, outgoingMessage) => {
+        setTimeout(() => {
+          outgoingMessage.end('foo');
+        }, 50);
+      },
+    );
 
-    // eslint-disable-next-line ava/use-t-well
     t.timeout(100);
 
     createHttpTerminator({
@@ -258,7 +245,7 @@ export default (createHttpServer: HttpServerFactoryType | HttpsServerFactoryType
       maxSockets: 1,
     });
 
-    const response = await got(httpServer.url, {
+    const response = await got(httpServer.url!, {
       agent: {
         http: httpAgent,
         https: httpsAgent,
