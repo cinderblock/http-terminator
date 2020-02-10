@@ -1,0 +1,123 @@
+name: Main
+
+on: [push, pull_request]
+
+jobs:
+  install-and-run-from-git:
+    name: Test from Github
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v1
+
+      - name: Install Node dependencies without building locally
+        run: npm install --ignore-scripts
+
+      - name: 'Debug: List post build files'
+        run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/build.list
+
+      # Prepare Test Environment
+
+      - name: Create Dummy Package.json
+        run: echo \{\} > test/package.json
+
+      - name: Install Current Version as Git Dependency
+        working-directory: test
+        run: npm install ${{ github.repository }}#${{ github.sha }}
+
+      - name: 'Debug: List Dependency Folder Contents'
+        working-directory: test
+        run: find node_modules/@cinderblock/http-terminator -type f -print
+
+      # Ensure the code works
+
+      - name: Run Tests with Prepared Git Dependency
+        run: npm test
+
+  coverage:
+    name: Test with Coverage
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v1
+
+      - name: 'Debug: Node version'
+        run: node --version
+
+      - name: Build
+        run: npm install
+
+      - name: 'Debug: List post build files'
+        run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/build.list
+
+      - name: Test Coverage
+        run: npm run coverage
+
+      - name: 'Debug: List post Coverage files'
+        run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/coverage.list
+
+      - name: 'Debug: Coverage diff'
+        run: 'diff -U 0 /tmp/build.list /tmp/coverage.list || :'
+
+      - name: 'Debug: List post Coverage files'
+        run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/gcov.list
+
+      - name: 'Debug: Print coverage report'
+        run: lcov --list coverage/lcov.info
+
+  publish:
+    name: Publish - Master
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    needs: [coverage, install-and-run-from-git]
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v1
+
+      - name: Create .npmrc with Auth Token
+        run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+
+      - name: Publish to npm - Error means no change
+        run: 'npm publish'
+        continue-on-error: true
+        env:
+          NPM_TOKEN: ${{ secrets.npm_token }}
+
+  install-and-run-from-npm:
+    needs: [publish]
+    name: Test Install from Npm
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v1
+
+      - name: Install Node dependencies without building locally
+        run: npm install --ignore-scripts
+
+      - name: 'Debug: List post build files'
+        run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/build.list
+
+      # Prepare Test Environment
+
+      - name: Create Dummy Package.json
+        run: echo \{\} > test/package.json
+
+      - name: Install Current Version as Git Dependency
+        working-directory: test
+        run: npm install @cinderblock/http-terminator
+
+      - name: 'Debug: List Dependency Folder Contents'
+        working-directory: test
+        run: find node_modules/@cinderblock/http-terminator -type f -print
+
+      # Ensure the code works
+
+      - name: Run Tests with Prepared Git Dependency
+        run: npm test
