@@ -7,9 +7,7 @@ module.exports = {
   },
   plugins: ['json'],
   rules: {
-    'json/*': ['error', 'allowComments'],
-    // or the equivalent:
-    'json/*': ['error', { allowComments: true }],
+    'json/*': ['error'],
   },
   extends: ['eslint:recommended'],
   overrides: [
