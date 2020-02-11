@@ -58,7 +58,7 @@ jobs:
         run: npm install --ignore-scripts
 
       - name: cSpell
-        run: npm run spellcheck -- --color
+        run: npm run spell -- --color
 
   install-and-run-from-git:
     name: Test from Github
