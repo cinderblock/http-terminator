@@ -17,9 +17,12 @@ Gracefully terminates HTTP(S) server, with TypeScript support.
 
 ## Behavior
 
-When you call [`server.close()`](https://nodejs.org/api/http.html#http_server_close_callback), it stops the server from accepting new connections, but it keeps the existing connections open indefinitely. This can result in your server hanging indefinitely due to keep-alive connections or because of the ongoing requests that do not produce a response. Therefore, in order to close the server, you must track creation of all connections and terminate them yourself.
+When you call [`server.close()`](https://nodejs.org/api/http.html#http_server_close_callback), it stops the server from accepting new connections, but it keeps the existing connections open indefinitely.
+This can result in your server hanging indefinitely due to keep-alive connections or because of the ongoing requests that do not produce a response.
+Therefore, in order to close the server, you must track creation of all connections and terminate them yourself.
 
-http-terminator implements the logic for tracking all connections and their termination upon a timeout. http-terminator also ensures graceful communication of the server intention to shutdown to any clients that are currently receiving response from this server.
+http-terminator implements the logic for tracking all connections and their termination upon a timeout.
+http-terminator also ensures graceful communication of the server intention to shutdown to any clients that are currently receiving response from this server.
 
 ## API
 
