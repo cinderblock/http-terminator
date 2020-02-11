@@ -120,7 +120,7 @@ jobs:
           working-directory: allure-results
 
       - name: Test with Coverage
-        run: npm test -- --color
+        run: npm test -- --color --detectOpenHandles
 
       - name: 'Debug: List post Coverage files'
         if: always()
