@@ -34,7 +34,7 @@ jobs:
       # Ensure the code works
 
       - name: Run Tests with Prepared Git Dependency
-        run: npm test
+        run: npm test -- --no-coverage --color
 
   coverage:
     name: Test with Coverage
@@ -54,19 +54,23 @@ jobs:
       - name: 'Debug: List post build files'
         run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/build.list
 
-      - name: Test Coverage
-        run: npm run coverage
+      - name: Test with Coverage
+        run: npm test
 
       - name: 'Debug: List post Coverage files'
+        if: always()
         run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/coverage.list
 
       - name: 'Debug: Coverage diff'
+        if: always()
         run: 'diff -U 0 /tmp/build.list /tmp/coverage.list || :'
 
       - name: 'Debug: List post Coverage files'
+        if: always()
         run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/gcov.list
 
       - name: 'Debug: Print coverage report'
+        if: always()
         run: lcov --list coverage/lcov.info
 
   publish:
@@ -120,4 +124,4 @@ jobs:
       # Ensure the code works
 
       - name: Run Tests with Prepared Git Dependency
-        run: npm test
+        run: npm test -- --no-coverage --color

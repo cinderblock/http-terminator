@@ -1,5 +1,7 @@
 test
 coverage
+public
 src
 .*
 *.log
+allure-results

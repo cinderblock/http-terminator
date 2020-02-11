@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import test from 'ava';
 import sinon from 'sinon';
 import delay from 'delay';
 import got from 'got';
@@ -13,14 +12,12 @@ import { HttpsServerFactoryType } from './createHttpsServer';
 export default (
   createHttpServer: HttpServerFactoryType | HttpsServerFactoryType,
 ): void => {
-  test('terminates HTTP server with no connections', async t => {
+  test('terminates HTTP server with no connections', async () => {
     const httpServer = await createHttpServer(() => {
       // Do nothing
     });
 
-    t.timeout(100);
-
-    t.true(httpServer.server.listening);
+    expect(httpServer.server.listening).toBe(true);
 
     const terminator = createHttpTerminator({
       server: httpServer.server,
@@ -28,17 +25,15 @@ export default (
 
     await terminator.terminate();
 
-    t.false(httpServer.server.listening);
-  });
+    expect(httpServer.server.listening).toBe(false);
+  }, 100);
 
-  test('terminates hanging sockets after gracefulTerminationTimeout', async t => {
+  test('terminates hanging sockets after gracefulTerminationTimeout', async () => {
     const spy = sinon.spy();
 
     const httpServer = await createHttpServer(() => {
       spy();
     });
-
-    t.timeout(500);
 
     const terminator = createHttpTerminator({
       gracefulTerminationTimeout: 150,
@@ -49,21 +44,21 @@ export default (
 
     await delay(50);
 
-    t.true(spy.called);
+    expect(spy.called).toBe(true);
 
     terminator.terminate();
 
     await delay(100);
 
     // The timeout has not passed.
-    t.is(await httpServer.getConnections(), 1);
+    expect(await httpServer.getConnections()).toBe(1);
 
     await delay(100);
 
-    t.is(await httpServer.getConnections(), 0);
-  });
+    expect(await httpServer.getConnections()).toBe(0);
+  }, 500);
 
-  test('server stops accepting new connections after terminator.terminate() is called', async t => {
+  test('server stops accepting new connections after terminator.terminate() is called', async () => {
     const stub = sinon.stub();
 
     stub.onCall(0).callsFake((incomingMessage, outgoingMessage) => {
@@ -77,8 +72,6 @@ export default (
     });
 
     const httpServer = await createHttpServer(stub);
-
-    t.timeout(500);
 
     const terminator = createHttpTerminator({
       gracefulTerminationTimeout: 150,
@@ -101,15 +94,15 @@ export default (
     });
 
     // @todo https://stackoverflow.com/q/59832897/368691
-    await t.throwsAsync(request1);
+    await expect(request1).rejects.toBe('foobar');
 
     const response0 = await request0;
 
-    t.is(response0.headers.connection, 'close');
-    t.is(response0.body, 'foo');
-  });
+    expect(response0.headers.connection).toBe('close');
+    expect(response0.body).toBe('foo');
+  }, 500);
 
-  test('ongoing requests receive {connection: close} header', async t => {
+  test('ongoing requests receive {connection: close} header', async () => {
     const httpServer = await createHttpServer(
       (incomingMessage, outgoingMessage) => {
         setTimeout(() => {
@@ -117,8 +110,6 @@ export default (
         }, 100);
       },
     );
-
-    t.timeout(600);
 
     const terminator = createHttpTerminator({
       gracefulTerminationTimeout: 150,
@@ -146,11 +137,11 @@ export default (
 
     const response = await request;
 
-    t.is(response.headers.connection, 'close');
-    t.is(response.body, 'foo');
-  });
+    expect(response.headers.connection).toBe('close');
+    expect(response.body).toBe('foo');
+  }, 600);
 
-  test('ongoing requests receive {connection: close} header (new request reusing an existing socket)', async t => {
+  test('ongoing requests receive {connection: close} header (new request reusing an existing socket)', async () => {
     const stub = sinon.stub();
 
     stub.onCall(0).callsFake((incomingMessage, outgoingMessage) => {
@@ -172,8 +163,6 @@ export default (
     });
 
     const httpServer = await createHttpServer(stub);
-
-    t.timeout(1000);
 
     const terminator = createHttpTerminator({
       gracefulTerminationTimeout: 150,
@@ -209,20 +198,20 @@ export default (
 
     await delay(50);
 
-    t.is(stub.callCount, 2);
+    expect(stub.callCount).toBe(2);
 
     const response0 = await request0;
 
-    t.is(response0.headers.connection, 'keep-alive');
-    t.is(response0.body, 'foobar');
+    expect(response0.headers.connection).toBe('keep-alive');
+    expect(response0.body).toBe('foobar');
 
     const response1 = await request1;
 
-    t.is(response1.headers.connection, 'close');
-    t.is(response1.body, 'baz');
-  });
+    expect(response1.headers.connection).toBe('close');
+    expect(response1.body).toBe('baz');
+  }, 1000);
 
-  test('does not send {connection: close} when server is not terminating', async t => {
+  test('does not send {connection: close} when server is not terminating', async () => {
     const httpServer = await createHttpServer(
       (incomingMessage, outgoingMessage) => {
         setTimeout(() => {
@@ -230,8 +219,6 @@ export default (
         }, 50);
       },
     );
-
-    t.timeout(100);
 
     createHttpTerminator({
       server: httpServer.server,
@@ -252,6 +239,6 @@ export default (
       },
     });
 
-    t.is(response.headers.connection, 'keep-alive');
-  });
+    expect(response.headers.connection).toBe('keep-alive');
+  }, 100);
 };

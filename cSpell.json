@@ -1,14 +1,17 @@
 {
   "version": "0.1",
   "language": "en",
-  "ignorePaths": ["package-lock.json", "dist/"],
+  "ignorePaths": ["package-lock.json", "dist/", "public/", "allure-results/"],
   "words": [
     "agentkeepalive",
     "cinderblock",
+    "commandline",
     "downlevel",
+    "espree",
     "Gajus",
     "Interop",
     "Kuizinas",
+    "lcov",
     "promisify",
     "roarr",
     "stateful",
