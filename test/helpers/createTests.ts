@@ -26,7 +26,7 @@ export default (
     await terminator.terminate();
 
     expect(httpServer.server.listening).toBe(false);
-  }, 100);
+  }, 2000);
 
   test('terminates hanging sockets after gracefulTerminationTimeout', async () => {
     const spy = sinon.spy();
@@ -42,7 +42,7 @@ export default (
 
     got(httpServer.url!);
 
-    await delay(50);
+    await delay(500);
 
     expect(spy.called).toBe(true);
 
@@ -56,7 +56,7 @@ export default (
     await delay(100);
 
     expect(await httpServer.getConnections()).toBe(0);
-  }, 500);
+  });
 
   test('server stops accepting new connections after terminator.terminate() is called', async () => {
     const stub = sinon.stub();
@@ -102,7 +102,7 @@ export default (
 
     expect(response0.headers.connection).toBe('close');
     expect(response0.body).toBe('foo');
-  }, 500);
+  }, 5000);
 
   test('ongoing requests receive {connection: close} header', async () => {
     const httpServer = await createHttpServer(
@@ -211,7 +211,7 @@ export default (
 
     expect(response1.headers.connection).toBe('close');
     expect(response1.body).toBe('baz');
-  }, 1000);
+  }, 10000);
 
   test('does not send {connection: close} when server is not terminating', async () => {
     const httpServer = await createHttpServer(
@@ -242,5 +242,5 @@ export default (
     });
 
     expect(response.headers.connection).toBe('keep-alive');
-  }, 100);
+  }, 1000);
 };
