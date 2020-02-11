@@ -163,7 +163,7 @@ jobs:
           username: 'GitHub Action Static Build'
           #useremail: "actions@github.com"
 
-  publish:
+  publish-master:
     name: Publish - Master
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
@@ -175,7 +175,6 @@ jobs:
         coverage,
         install-and-run-from-git,
       ]
-
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v1
@@ -183,18 +182,16 @@ jobs:
       - name: Create .npmrc with Auth Token
         run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
 
-      - name: Publish to npm - Error means no change
-        run: 'npm publish'
-        continue-on-error: true
+      - name: Publish to npm latest - Error means no change
+        run: npm publish
+        continue-on-error: true # npm publish exits with error iff package version already published.
         env:
           NPM_TOKEN: ${{ secrets.npm_token }}
 
-  install-and-run-from-npm:
-    needs: [publish]
+  install-and-run-from-npm-master:
+    needs: [publish-master]
     name: Test Install from Npm
-
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v1
@@ -213,6 +210,62 @@ jobs:
       - name: Install Current Version as Git Dependency
         working-directory: test
         run: npm install @cinderblock/http-terminator
+
+      - name: 'Debug: List Dependency Folder Contents'
+        working-directory: test
+        run: find node_modules/@cinderblock/http-terminator -type f -print
+
+      # Ensure the code works
+
+      - name: Run Tests with Prepared Git Dependency
+        run: npm test -- --no-coverage --color
+
+  publish-beta:
+    name: Publish - Beta
+    if: github.event_name == 'push' && github.ref == 'refs/heads/beta'
+    runs-on: ubuntu-latest
+    needs:
+      # prettier-ignore
+      [
+        check-format,
+        check-lint,
+        check-spelling,
+      ]
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v1
+
+      - name: Create .npmrc with Auth Token
+        run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+
+      - name: Publish to npm beta - Error means no change
+        run: npm publish --tag beta
+        continue-on-error: true # npm publish exits with error iff package version already published.
+        env:
+          NPM_TOKEN: ${{ secrets.npm_token }}
+
+  install-and-run-from-npm-beta:
+    needs: [publish-beta]
+    name: Test Install from Npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v1
+
+      - name: Install Node dependencies without building locally
+        run: npm install --ignore-scripts
+
+      - name: 'Debug: List post build files'
+        run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/build.list
+
+      # Prepare Test Environment
+
+      - name: Create Dummy Package.json
+        run: echo \{\} > test/package.json
+
+      - name: Install Current Version as Git Dependency
+        working-directory: test
+        run: npm install @cinderblock/http-terminator@beta
 
       - name: 'Debug: List Dependency Folder Contents'
         working-directory: test
