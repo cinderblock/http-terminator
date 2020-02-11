@@ -112,7 +112,7 @@ jobs:
         run: find * \( -path node_modules -o -path .git \) -print -prune -o -type f -print | tee /tmp/build.list
 
       - name: Checkout Working Directory
-        uses: cinderblock/github-action-working-directory
+        uses: cinderblock/github-action-working-directory@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
