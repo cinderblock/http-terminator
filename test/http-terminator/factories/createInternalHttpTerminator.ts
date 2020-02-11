@@ -81,6 +81,8 @@ describe('Internal Tests', () => {
       },
     });
 
+    expect.assertions(1);
+
     expect(request1).rejects.toBe(
       new RequestError(new Error('read ECONNRESET'), {} as NormalizedOptions),
     );

@@ -93,6 +93,8 @@ export default (
       },
     });
 
+    expect.assertions(1);
+
     // @todo https://stackoverflow.com/q/59832897/368691
     await expect(request1).rejects.toBe('foobar');
 
