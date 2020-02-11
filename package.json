@@ -72,6 +72,7 @@
     "spell": "cspell \"**\"",
     "format": "prettier \"**\" \".*/**\"",
     "format-check": "npm run format -- --check",
-    "test": "jest"
+    "test": "jest",
+    "allure": "allure --verbose generate ./allure-results --clean --report-dir public/allure-report"
   }
 }
