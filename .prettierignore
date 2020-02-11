@@ -1,5 +1,14 @@
 coverage
 public
+allure-results
 dist
 node_modules
 *.log
+
+.editorconfig
+.eslintignore
+.gitignore
+.npmignore
+.prettierignore
+
+LICENSE

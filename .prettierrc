@@ -1,5 +1,6 @@
 {
   "semi": true,
   "singleQuote": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "overrides": [{ "files": [".nycrc"], "options": { "parser": "json" } }]
 }

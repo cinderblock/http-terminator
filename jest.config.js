@@ -8,9 +8,7 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.ts'],
   testRegex: '/test/http-terminator/',
   verbose: true,
-  setupFilesAfterEnv: [
-    './test/helpers/jest.allure2.js',
-  ],
+  setupFilesAfterEnv: ['./test/helpers/jest.allure2.js'],
   watchPathIgnorePatterns: ['^public'],
   reporters: [
     'default',
