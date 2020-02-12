@@ -37,3 +37,4 @@ jobs:
 
       - name: Test
         run: npm test -- --no-coverage --color
+        timeout-minutes: 10

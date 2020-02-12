@@ -92,6 +92,7 @@ jobs:
 
       - name: Run Tests with Prepared Git Dependency
         run: npm test -- --no-coverage --color
+        timeout-minutes: 10
 
   coverage:
     name: Test with Coverage
@@ -121,6 +122,7 @@ jobs:
 
       - name: Test with Coverage
         run: npm test -- --color --detectOpenHandles
+        timeout-minutes: 10
 
       - name: 'Debug: List post Coverage files'
         if: always()
@@ -222,6 +224,7 @@ jobs:
 
       - name: Run Tests with Prepared Git Dependency
         run: npm test -- --no-coverage --color
+        timeout-minutes: 10
 
   publish-beta:
     name: Publish - Beta
@@ -281,3 +284,4 @@ jobs:
 
       - name: Run Tests with Prepared Git Dependency
         run: npm test -- --no-coverage --color
+        timeout-minutes: 10
