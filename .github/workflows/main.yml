@@ -179,11 +179,11 @@ jobs:
       - name: Checkout latest code
         uses: actions/checkout@v1
 
-      - name: Create .npmrc with Auth Token
-        run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
-
       - name: Install Deps and build
         run: npm install --color
+
+      - name: Create .npmrc with Auth Token
+        run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
 
       - name: Publish to npm latest - Error means no change
         run: npm publish --color --ignore-scripts
@@ -238,11 +238,11 @@ jobs:
       - name: Checkout latest code
         uses: actions/checkout@v1
 
-      - name: Create .npmrc with Auth Token
-        run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
-
       - name: Install Deps and build
         run: npm install --color
+
+      - name: Create .npmrc with Auth Token
+        run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
 
       - name: Publish to npm beta - Error means no change
         run: npm publish --color --ignore-scripts --tag beta
