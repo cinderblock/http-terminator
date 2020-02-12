@@ -188,7 +188,7 @@ jobs:
         run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
 
       - name: Publish to npm latest - Error means no change
-        run: npm publish --color --ignore-scripts
+        run: npm publish --access public --color --ignore-scripts
         continue-on-error: true # npm publish exits with error iff package version already published.
         env:
           NPM_TOKEN: ${{ secrets.npm_token }}
@@ -248,7 +248,7 @@ jobs:
         run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
 
       - name: Publish to npm beta - Error means no change
-        run: npm publish --color --ignore-scripts --tag beta
+        run: npm publish --access public --color --ignore-scripts --tag beta
         continue-on-error: true # npm publish exits with error iff package version already published.
         env:
           NPM_TOKEN: ${{ secrets.npm_token }}
